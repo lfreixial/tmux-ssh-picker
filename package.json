@@ -1,0 +1,14 @@
+{
+  "name": "tmux-ssh-picker",
+  "version": "0.0.0-development",
+  "private": true,
+  "description": "A tmux plugin for quickly SSHing into saved hosts with fzf.",
+  "license": "MIT",
+  "devDependencies": {
+    "@semantic-release/commit-analyzer": "latest",
+    "@semantic-release/github": "latest",
+    "@semantic-release/release-notes-generator": "latest",
+    "conventional-changelog-conventionalcommits": "latest",
+    "semantic-release": "latest"
+  }
+}

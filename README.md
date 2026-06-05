@@ -2,7 +2,7 @@
 
 A tmux plugin for quickly SSHing into saved SSH hosts with `fzf`.
 
-Press a tmux key binding, pick a host, and the plugin starts SSH in the current pane, a new window, or a split.
+Press a tmux key binding, pick a host, and the plugin starts SSH in a new tmux window by default.
 
 ```text
 +--------------------------------------------------------------+
@@ -104,13 +104,13 @@ set -g @ssh-picker-key s
 Choose where SSH opens:
 
 ```tmux
-set -g @ssh-picker-action current
+set -g @ssh-picker-action new-window
 ```
 
 Supported actions:
 
+- `new-window`: open SSH in a new tmux window, the default
 - `current`: send `ssh host` to the current pane
-- `new-window`: open SSH in a new tmux window
 - `hsplit`: open SSH in a horizontal split
 - `vsplit`: open SSH in a vertical split
 
@@ -154,6 +154,16 @@ set -g @ssh-picker-known-hosts '~/.ssh/known_hosts'
 ```
 
 Hashed `known_hosts` entries cannot be shown because SSH intentionally hides the hostname.
+
+## Releases
+
+Releases are created automatically from Conventional Commits when changes are merged to `main`:
+
+- `feat!:` or `BREAKING CHANGE:` creates a major release.
+- `feat:` creates a minor release.
+- `fix:`, `perf:`, `docs:`, `test:`, `ci:`, `build:`, `chore:`, `refactor:`, and `style:` create patch releases.
+
+Every merge to `main` should use one of those Conventional Commit types so the release workflow can calculate the next version.
 
 ## Development
 

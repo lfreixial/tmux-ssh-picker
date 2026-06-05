@@ -402,7 +402,7 @@ new_connection() {
 
 run_connection() {
   host="$1"
-  action="$(tmux_option @ssh-picker-action current)"
+  action="$(tmux_option @ssh-picker-action new-window)"
   ssh_command="$(tmux_option @ssh-picker-command ssh)"
   target_pane="${SSH_PICKER_TARGET_PANE:-}"
   quoted_host="$(shell_quote "$host")"
