@@ -1,0 +1,10 @@
++--------------------------------------------------------------+
+| SSH Picker                                                   |
+|                                                              |
+| ssh>                                                         |
+| 3/3                                                          |
+| enter: connect | ctrl-n: new saved connection                |
+| > web-prod      deploy@web-prod.example.com                  |
+|   db-staging    admin@db-staging.example.com                 |
+|   jumpbox       ops@jumpbox.example.com                      |
++--------------------------------------------------------------+
