@@ -29,7 +29,7 @@ tmux_set_default() {
 tmux_set_default @ssh-picker-key S
 tmux_set_default @ssh-picker-popup-width '80%'
 tmux_set_default @ssh-picker-popup-height '70%'
-tmux_set_default @ssh-picker-action current
+tmux_set_default @ssh-picker-action new-window
 tmux_set_default @ssh-picker-command ssh
 tmux_set_default @ssh-picker-config-files "$HOME/.ssh/config"
 tmux_set_default @ssh-picker-extra-hosts ''
