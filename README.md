@@ -43,10 +43,10 @@ Clone the plugin:
 git clone https://github.com/lfreixial/tmux-ssh-picker ~/.tmux/plugins/tmux-ssh-picker
 ```
 
-Source it from `.tmux.conf`:
+Load it from `.tmux.conf`:
 
 ```tmux
-source-file ~/.tmux/plugins/tmux-ssh-picker/tmux-ssh-picker.tmux
+run-shell ~/.tmux/plugins/tmux-ssh-picker/tmux-ssh-picker.tmux
 ```
 
 Reload tmux:
