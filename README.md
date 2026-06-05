@@ -20,7 +20,7 @@ Press a tmux key binding, pick a host, and the plugin starts SSH in the current 
 ## Requirements
 
 - tmux 3.2 or newer for `display-popup`
-- `fzf`
+- `fzf` 0.38 or newer (for the `become` binding used by `ctrl-n`)
 - `ssh`
 
 ## Install

@@ -213,9 +213,9 @@ extract_known_hosts() {
       {
         hosts = $1
         if (hosts ~ /^@/) hosts = $2
-        split(hosts, names, ",")
+        n = split(hosts, names, ",")
 
-        for (i in names) {
+        for (i = 1; i <= n; i++) {
           host = names[i]
           if (host == "" || host ~ /^\|/) continue
           if (host ~ /^\[/) {
@@ -482,14 +482,15 @@ select_host() {
 
   list_hosts | format_hosts_for_fzf > "$hosts_file"
 
+  header='enter: connect | ctrl-n: new saved connection'
   if [ ! -s "$hosts_file" ]; then
-    show_error "no hosts found; press ctrl-n in the picker to add one"
+    header="no hosts found -- press ctrl-n to add one"
   fi
 
   selected="$(
     fzf \
       --prompt='ssh> ' \
-      --header='enter: connect | ctrl-n: new saved connection' \
+      --header="$header" \
       --height=100% \
       --layout=reverse \
       --border \
