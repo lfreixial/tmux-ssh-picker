@@ -39,6 +39,13 @@ shell_quote() {
   printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
 }
 
+option_enabled() {
+  case "$1" in
+    on|yes|true|1) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 show_error() {
   if [ "$SSH_PICKER_TEST_MODE" = 1 ] || ! command -v tmux >/dev/null 2>&1; then
     printf 'tmux-ssh-picker: %s\n' "$1" >&2
@@ -404,38 +411,42 @@ run_connection() {
   host="$1"
   action="$(tmux_option @ssh-picker-action new-window)"
   ssh_command="$(tmux_option @ssh-picker-command ssh)"
+  rename_window="$(tmux_option @ssh-picker-rename-window on)"
   target_pane="${SSH_PICKER_TARGET_PANE:-}"
   quoted_host="$(shell_quote "$host")"
   command="$ssh_command $quoted_host"
 
+  window_name=""
+  if option_enabled "$rename_window"; then
+    window_name="${ssh_command%% *} | $host"
+  fi
+
   if [ "$SSH_PICKER_TEST_MODE" = 1 ]; then
     printf '%s\n' "$command"
+    [ -z "$window_name" ] || printf 'window-name: %s\n' "$window_name"
     return 0
   fi
 
   case "$action" in
     current)
-      if [ -n "$target_pane" ]; then
-        tmux send-keys -t "$target_pane" "$command" C-m
-      else
-        tmux send-keys "$command" C-m
-      fi
+      pane="${target_pane:-$(tmux display-message -p '#{pane_id}')}"
+      tmux send-keys -t "$pane" "$command" C-m
       ;;
     new-window)
-      tmux new-window "$command"
+      pane="$(tmux new-window -P -F '#{pane_id}' "$command")"
       ;;
     hsplit)
       if [ -n "$target_pane" ]; then
-        tmux split-window -t "$target_pane" -h "$command"
+        pane="$(tmux split-window -t "$target_pane" -h -P -F '#{pane_id}' "$command")"
       else
-        tmux split-window -h "$command"
+        pane="$(tmux split-window -h -P -F '#{pane_id}' "$command")"
       fi
       ;;
     vsplit)
       if [ -n "$target_pane" ]; then
-        tmux split-window -t "$target_pane" -v "$command"
+        pane="$(tmux split-window -t "$target_pane" -v -P -F '#{pane_id}' "$command")"
       else
-        tmux split-window -v "$command"
+        pane="$(tmux split-window -v -P -F '#{pane_id}' "$command")"
       fi
       ;;
     *)
@@ -443,6 +454,12 @@ run_connection() {
       exit 1
       ;;
   esac
+
+  if [ -n "$window_name" ]; then
+    window="$(tmux display-message -p -t "$pane" '#{window_id}')"
+    tmux set-window-option -t "$window" automatic-rename off
+    tmux rename-window -t "$window" "$window_name"
+  fi
 }
 
 format_hosts_for_fzf() {
@@ -530,6 +547,7 @@ case "${1:-popup}" in
   popup) open_popup ;;
   select) select_host ;;
   new) new_connection ;;
+  connect) shift; [ "$#" -ge 1 ] || { show_error "connect requires a host"; exit 1; }; run_connection "$1" ;;
   list) list_hosts ;;
   format) format_hosts_for_fzf ;;
   *) show_error "unknown command '$1'"; exit 1 ;;
