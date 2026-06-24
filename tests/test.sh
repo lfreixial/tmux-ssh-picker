@@ -121,12 +121,21 @@ else
 fi
 
 named="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window sh "$SCRIPT" connect pi)"
-assert_eq "$(printf "ssh 'pi'\nwindow-name: ssh | pi")" "$named" "rename-window sets window name to 'command | host'"
+assert_eq "$(printf "new-window ssh 'pi'\nwindow-name: ssh | pi")" "$named" "rename-window sets window name to 'command | host'"
 
 custom="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window SSH_PICKER_COMMAND='mosh -A' sh "$SCRIPT" connect pi)"
-assert_eq "$(printf "mosh -A 'pi'\nwindow-name: mosh | pi")" "$custom" "window name uses the ssh command's first word"
+assert_eq "$(printf "new-window mosh -A 'pi'\nwindow-name: mosh | pi")" "$custom" "window name uses the ssh command's first word"
 
 off="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window SSH_PICKER_RENAME_WINDOW=off sh "$SCRIPT" connect pi)"
-assert_eq "ssh 'pi'" "$off" "rename-window off leaves the window name unchanged"
+assert_eq "new-window ssh 'pi'" "$off" "rename-window off leaves the window name unchanged"
+
+default_action="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=current SSH_PICKER_RENAME_WINDOW=off sh "$SCRIPT" connect pi)"
+assert_eq "current ssh 'pi'" "$default_action" "connect uses the configured action by default"
+
+override_action="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=current SSH_PICKER_RENAME_WINDOW=off sh "$SCRIPT" connect pi hsplit)"
+assert_eq "hsplit ssh 'pi'" "$override_action" "connect action argument overrides the configured action"
+
+empty_override="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=current SSH_PICKER_RENAME_WINDOW=off sh "$SCRIPT" connect pi '')"
+assert_eq "current ssh 'pi'" "$empty_override" "empty override falls back to the configured action"
 
 printf 'all tests passed\n'

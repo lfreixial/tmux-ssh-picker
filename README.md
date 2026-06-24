@@ -66,9 +66,16 @@ prefix + S
 Inside the picker:
 
 ```text
-enter   connect to the selected host
+enter   connect using the configured @ssh-picker-action
+ctrl-w  connect in a new window
+ctrl-s  connect in a horizontal split
+ctrl-v  connect in a vertical split
+ctrl-x  connect in the current pane
 ctrl-n  add a new saved SSH connection
 ```
+
+`enter` uses whatever `@ssh-picker-action` is set to; the `ctrl-` keys override
+the action for that one connection.
 
 The host list comes from:
 

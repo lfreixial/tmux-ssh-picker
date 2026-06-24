@@ -409,7 +409,7 @@ new_connection() {
 
 run_connection() {
   host="$1"
-  action="$(tmux_option @ssh-picker-action new-window)"
+  action="${2:-$(tmux_option @ssh-picker-action new-window)}"
   ssh_command="$(tmux_option @ssh-picker-command ssh)"
   rename_window="$(tmux_option @ssh-picker-rename-window on)"
   target_pane="${SSH_PICKER_TARGET_PANE:-}"
@@ -422,7 +422,7 @@ run_connection() {
   fi
 
   if [ "$SSH_PICKER_TEST_MODE" = 1 ]; then
-    printf '%s\n' "$command"
+    printf '%s %s\n' "$action" "$command"
     [ -z "$window_name" ] || printf 'window-name: %s\n' "$window_name"
     return 0
   fi
@@ -499,12 +499,12 @@ select_host() {
 
   list_hosts | format_hosts_for_fzf > "$hosts_file"
 
-  header='enter: connect | ctrl-n: new saved connection'
+  header='enter: default | C-w: window | C-s: hsplit | C-v: vsplit | C-x: here | C-n: new'
   if [ ! -s "$hosts_file" ]; then
     header="no hosts found -- press ctrl-n to add one"
   fi
 
-  selected="$(
+  output="$(
     fzf \
       --prompt='ssh> ' \
       --header="$header" \
@@ -513,16 +513,30 @@ select_host() {
       --border \
       --delimiter="$(printf '\t')" \
       --with-nth=4 \
+      --expect=ctrl-w,ctrl-s,ctrl-v,ctrl-x \
       --bind="ctrl-n:become(sh $(shell_quote "$plugin_dir/scripts/ssh-picker.sh") new)" \
       --preview='printf "%s\n\n%s\n\n%s\n" {1} {2} {3}' \
       --preview-window='right:50%:wrap' \
       < "$hosts_file"
   )" || exit 0
 
+  # With --expect, the first line is the key pressed (empty for plain enter),
+  # the second line is the selected row.
+  key="$(printf '%s\n' "$output" | sed -n '1p')"
+  selected="$(printf '%s\n' "$output" | sed -n '2p')"
+
   host="$(printf '%s\n' "$selected" | awk -F '\t' '{ print $1 }')"
   [ -n "$host" ] || exit 0
 
-  run_connection "$host"
+  case "$key" in
+    ctrl-w) action=new-window ;;
+    ctrl-s) action=hsplit ;;
+    ctrl-v) action=vsplit ;;
+    ctrl-x) action=current ;;
+    *) action="" ;;
+  esac
+
+  run_connection "$host" "$action"
 }
 
 open_popup() {
@@ -547,7 +561,7 @@ case "${1:-popup}" in
   popup) open_popup ;;
   select) select_host ;;
   new) new_connection ;;
-  connect) shift; [ "$#" -ge 1 ] || { show_error "connect requires a host"; exit 1; }; run_connection "$1" ;;
+  connect) shift; [ "$#" -ge 1 ] || { show_error "connect requires a host"; exit 1; }; run_connection "$1" "${2:-}" ;;
   list) list_hosts ;;
   format) format_hosts_for_fzf ;;
   *) show_error "unknown command '$1'"; exit 1 ;;
