@@ -120,4 +120,13 @@ else
   exit 1
 fi
 
+named="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window sh "$SCRIPT" connect pi)"
+assert_eq "$(printf "ssh 'pi'\nwindow-name: ssh | pi")" "$named" "rename-window sets window name to 'command | host'"
+
+custom="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window SSH_PICKER_COMMAND='mosh -A' sh "$SCRIPT" connect pi)"
+assert_eq "$(printf "mosh -A 'pi'\nwindow-name: mosh | pi")" "$custom" "window name uses the ssh command's first word"
+
+off="$(env SSH_PICKER_TEST_MODE=1 SSH_PICKER_ACTION=new-window SSH_PICKER_RENAME_WINDOW=off sh "$SCRIPT" connect pi)"
+assert_eq "ssh 'pi'" "$off" "rename-window off leaves the window name unchanged"
+
 printf 'all tests passed\n'

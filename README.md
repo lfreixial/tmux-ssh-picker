@@ -114,6 +114,13 @@ Supported actions:
 - `hsplit`: open SSH in a horizontal split
 - `vsplit`: open SSH in a vertical split
 
+The window running SSH is renamed to `<command> | <host>` (e.g. `ssh | pi`), and
+tmux's automatic renaming is turned off for it so the name sticks. Disable with:
+
+```tmux
+set -g @ssh-picker-rename-window off
+```
+
 Change popup size:
 
 ```tmux
